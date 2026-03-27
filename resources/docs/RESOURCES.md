@@ -10,7 +10,3 @@
 #### OpenAI
 - OpenAI Chat Completion API: https://platform.openai.com/docs/api-reference/chat/create?lang=python
 - OpenAI Pricing: https://openai.com/pricing
-
-#### Replicate
-- Replicate Python SDK: https://replicate.com/docs/get-started/python
-- Replicate Pricing: https://replicate.com/pricing

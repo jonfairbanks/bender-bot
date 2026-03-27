@@ -8,7 +8,6 @@ slack-bolt = "*"
 openai = "*"
 black = "*"
 python-dotenv = "*"
-replicate = "*"
 asyncio = "*"
 certifi = "*"
 together = "*"
@@ -16,4 +15,4 @@ together = "*"
 [dev-packages]
 
 [requires]
-python_version = "3.11"
+python_version = "3.14"

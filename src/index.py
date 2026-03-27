@@ -6,7 +6,6 @@ import time
 
 import context
 
-from images import generate_image
 from chat import openai_chat_completion
 from chat import together_chat_completion
 from log_config import logger
@@ -106,26 +105,6 @@ async def handle_app_mentions(ack, body, say, client):
                     }
                 ],
             },
-        ],
-    )
-
-
-# Respond to /generate commands
-@app.command("/generate")
-async def generate(ack, say, body):
-    await ack()
-    prompt = body["text"]
-    logger.debug(f"📸 Generate image prompt: {prompt}")
-    image = generate_image(prompt)
-    await say(
-        text=prompt,
-        blocks=[
-            {
-                "type": "image",
-                "title": {"type": "plain_text", "text": prompt, "emoji": True},
-                "image_url": image,
-                "alt_text": prompt,
-            }
         ],
     )
 

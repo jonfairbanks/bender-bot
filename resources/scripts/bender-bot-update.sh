@@ -17,7 +17,6 @@ docker run -d \
 -e SLACK_BOT_TOKEN=$SLACK_BOT_TOKEN \
 -e SLACK_SIGNING_SECRET=$SLACK_SIGNING_SECRET \
 -e OPENAI_API_KEY=$OPENAI_API_KEY \
--e REPLICATE_API_TOKEN=$REPLICATE_API_TOKEN \
 -e DEBUG=True \
 --name=bender-bot \
 --restart=always \
