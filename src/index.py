@@ -61,7 +61,6 @@ async def handle_app_mentions(ack, body, say, client):
     try:
         channel_id = body["event"]["channel"]
         message_ts = body["event"]["ts"]
-        message_type = body["event"]["type"]
         await client.reactions_add(
             channel=channel_id, timestamp=message_ts, name="eyes"
         )

@@ -90,7 +90,6 @@ def handle_events(body):
 
     except Exception as e:
         # Log the incoming event
-        message_text = body["event"]["text"]
         message_type = body["event"]["type"]
         channel_id = body["event"]["channel"]
         logger.debug(
