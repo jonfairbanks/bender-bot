@@ -1,5 +1,6 @@
 import json
 import os
+from pathlib import Path
 
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -8,7 +9,7 @@ from together import Together
 import context
 from log_config import logger
 
-load_dotenv()
+load_dotenv(dotenv_path=Path(__file__).with_name(".env"), override=True)
 
 PERSONALITY = os.getenv(
     "PERSONALITY",

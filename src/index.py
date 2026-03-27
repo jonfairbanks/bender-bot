@@ -3,6 +3,7 @@ import json
 import os
 import sys
 import time
+from pathlib import Path
 
 import context
 
@@ -14,7 +15,7 @@ from dotenv import load_dotenv
 from slack_bolt.app.async_app import AsyncApp
 from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
 
-load_dotenv()
+load_dotenv(dotenv_path=Path(__file__).with_name(".env"), override=True)
 
 # Determine Mode -- RESPOND or LISTEN
 mode = os.getenv("BOT_MODE", "RESPOND")
@@ -78,6 +79,9 @@ async def handle_app_mentions(ack, body, say, client):
         ai_resp = together_chat_completion(channel_id)
     elif os.getenv("OPENAI_API_KEY"):
         ai_resp = openai_chat_completion(channel_id)
+    else:
+        logger.warning("No OpenAI or Together API key configured; skipping reply")
+        return await say("No chat provider is configured for this bot.")
     end_time = time.time()
     elapsed_time = f"{(end_time - start_time):.2f}"
 
@@ -110,24 +114,21 @@ async def handle_app_mentions(ack, body, say, client):
 
 # Respond to /context commands
 @app.command("/context")
-async def get_context(ack, body, say):
+async def get_context(ack, body, respond):
     await ack()
     channel_id = body["channel_id"]
-    try:
-        channel_context = json.dumps(context.CHAT_CONTEXT[channel_id])
-    except Exception:
-        channel_context = []
-    await say(f"Channel Context: ```{channel_context}```")
+    channel_context = json.dumps(context.CHAT_CONTEXT.get(channel_id, []))
+    await respond(f"Channel Context: ```{channel_context}```")
     return
 
 
 # Respond to /reset commands
 @app.command("/reset")
-async def reset_context(ack, body, say):
+async def reset_context(ack, body, respond):
     await ack()
     channel_id = body["channel_id"]
-    context.CHAT_CONTEXT[channel_id].clear()
-    await say("Hmm, I forgot what we were talking about 🤔")
+    context.CHAT_CONTEXT.setdefault(channel_id, []).clear()
+    await respond("Hmm, I forgot what we were talking about 🤔")
 
 
 # Catch all (should be last handler)

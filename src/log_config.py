@@ -1,8 +1,9 @@
 import logging, os, sys
+from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(dotenv_path=Path(__file__).with_name(".env"), override=True)
 
 # Create the formatter
 formatter = logging.Formatter(
