@@ -11,7 +11,11 @@ global CHAT_CONTEXT
 global CHAT_DEPTH
 
 CHAT_CONTEXT = {}
-CONTEXT_DEPTH = os.environ.get("CONTEXT_DEPTH", 25)
+try:
+    CONTEXT_DEPTH = int(os.environ.get("CONTEXT_DEPTH", 25))
+except ValueError:
+    CONTEXT_DEPTH = 25
+    logger.warning("Invalid CONTEXT_DEPTH value; falling back to 25")
 
 
 def handle_events(body):
@@ -102,6 +106,7 @@ def handle_change(body):
     new_message_text = body["event"]["message"]["text"]
     channel_id = body["event"]["channel"]
     try:
+        CHAT_CONTEXT.setdefault(channel_id, [])
         for i, s in enumerate(CHAT_CONTEXT[channel_id]):
             if message_text in s["content"]:
                 CHAT_CONTEXT[channel_id][i]["content"] = new_message_text
@@ -118,6 +123,7 @@ def handle_delete(body):
     message_text = body["event"]["previous_message"]["text"]
     channel_id = body["event"]["channel"]
     try:
+        CHAT_CONTEXT.setdefault(channel_id, [])
         for i, s in enumerate(CHAT_CONTEXT[channel_id]):
             if message_text in s["content"]:
                 CHAT_CONTEXT[channel_id].remove(CHAT_CONTEXT[channel_id][i])
