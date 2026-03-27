@@ -1,7 +1,7 @@
 import json
 import os
-import openai
 
+from openai import OpenAI
 from dotenv import load_dotenv
 from together import Together
 
@@ -40,8 +40,12 @@ if os.getenv("TOGETHER_API_KEY"):
 ##################
 
 elif os.getenv("OPENAI_API_KEY"):
-    openai.api_key = os.getenv("OPENAI_API_KEY")
-    MODEL = os.getenv("OPENAI_API_MODEL", "gpt-3.5-turbo")  # gpt-3.5-turbo, gpt-4, etc.
+    client = OpenAI(
+        api_key=os.getenv("OPENAI_API_KEY"),
+        timeout=TIMEOUT,
+        max_retries=2,
+    )
+    MODEL = os.getenv("OPENAI_API_MODEL", "gpt-5.4-nano")
 
 
 def openai_chat_completion(channel_id):
@@ -61,10 +65,11 @@ def openai_chat_completion(channel_id):
 
     try:
         logger.debug(f"📞 Calling OpenAI: {request}\n")
-        completion = openai.ChatCompletion.create(
-            model=MODEL, messages=request, request_timeout=TIMEOUT
+        completion = client.chat.completions.create(
+            model=MODEL,
+            messages=request,
         )
-        logger.debug(f"📩 OpenAI Response: {json.dumps(completion)}\n")
+        logger.debug(f"📩 OpenAI Response: {completion.model_dump_json()}\n")
 
         resp = {
             "usage": completion.usage.total_tokens,
