@@ -1,10 +1,6 @@
-import mimetypes
 import os
 import re
 
-import files
-
-from images import interrogate_image
 from log_config import logger
 
 global CHAT_CONTEXT
@@ -44,49 +40,6 @@ def handle_events(body):
 
         if len(CHAT_CONTEXT[channel_id]) > CONTEXT_DEPTH:
             CHAT_CONTEXT[channel_id].pop(0)
-
-        # Handle files
-        if "files" in body["event"].keys():
-            try:
-                # Extract file info
-                attached_file = body["event"]["files"][0]
-                remote_file_url = attached_file["url_private_download"]
-                remote_file_name = attached_file["name"]
-
-                # Save temp copy and get local file path
-                local_file_path = files.save_file(remote_file_url, remote_file_name)
-
-                # Check mimetype of file
-                mimetype, encoding = mimetypes.guess_type(local_file_path)
-                logger.debug(f"Found a file: {mimetype}")
-                # Handle files based on mimetype
-                if "image" in mimetype:
-                    logger.debug("Found an image")
-                #     try:
-                #         prompt = interrogate_image(local_file_path)
-                #         logger.debug(f"🔍 Extracted prompt: {prompt}")
-                #         CHAT_CONTEXT[channel_id].append(
-                #             {"role": "user", "content": f"{prompt}"}
-                #         )
-                #     except Exception as e:
-                #         logger.error("⛔ Failed to interrogate image: {e}")
-                # elif "text" in mimetype or "json" in mimetype:
-                #     data = files.open_file(local_file_path)
-                #     CHAT_CONTEXT[channel_id].append(
-                #         {"role": "user", "content": f"{data}"}
-                #     )
-                # elif "audio" in mimetype:
-                #     logger.debug(f"🎧 {mimetype} found but not yet supported")
-                # elif "video" in mimetype:
-                #     logger.debug(f"📹 {mimetype} found but not yet supported")
-                # else:
-                #     logger.warning(f"⚠️ Unsupported filetype: {mimetype}")
-
-                # Delete temp file
-                files.delete_file(local_file_path)
-
-            except Exception as e:
-                logger.error(f"⛔ Failed to process file: {e}")
 
     except Exception as e:
         # Log the incoming event
