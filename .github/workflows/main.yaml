@@ -22,12 +22,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Install Trivy
-        uses: aquasecurity/setup-trivy@v0.2.6
-        with:
-          version: v0.68.2
-          cache: false
-
       - name: Run Trivy vulnerability scanner in repo mode
         uses: aquasecurity/trivy-action@v0.33.1
         with:
@@ -37,7 +31,8 @@ jobs:
           format: sarif
           output: trivy-results.sarif
           severity: CRITICAL,HIGH,MODERATE
-          skip-setup-trivy: true
+          limit-severities-for-sarif: true
+          version: v0.69.3
 
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v4
