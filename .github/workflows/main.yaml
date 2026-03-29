@@ -30,7 +30,7 @@ jobs:
           ignore-unfixed: true
           format: sarif
           output: trivy-results.sarif
-          severity: CRITICAL,HIGH,MODERATE
+          severity: CRITICAL,HIGH
           limit-severities-for-sarif: true
           version: v0.69.3
 
@@ -141,7 +141,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_ACCESS_TOKEN }}
-        
+
       - name: Build & Push Base Image
         id: docker-build
         uses: docker/build-push-action@v6
@@ -163,7 +163,7 @@ jobs:
           git config --global user.email "fairplay89@gmail.com"
           git config --global user.name "jonfairbanks"
           git clone "https://${{ secrets.HELM_CHARTS_PAT }}@github.com/jonfairbanks/helm-charts.git" "$CLONE_DIR"
-          
+
           # Package chart and push commit
           helm package ./chart
           cp *.tgz "$CLONE_DIR/_releases/"
