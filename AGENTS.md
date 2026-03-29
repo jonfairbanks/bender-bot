@@ -43,12 +43,17 @@ There is no dedicated automated test suite in this repo. Use these commands to v
   - avoid noisy startup/debug logs unless they are required for troubleshooting
 - Prefer least-privilege changes in workflow files and CI config.
 - When updating GitHub Actions:
-  - verify the upstream release page for the action before bumping the tag
-  - prefer the latest published major tag only if that major actually exists upstream
+  - inventory every `uses:` entry in every workflow file before making changes
+  - verify the upstream release page for each action before bumping the tag
+  - confirm the latest published major tag from the release page, not from memory or examples
   - do not assume `v4` or `v5` exists just because it feels current
-  - keep major-tag bumps scoped to the specific action that changed
+  - separate the action version from any tool version passed as an input
+    - example: Trivy Action version and Trivy binary version are different knobs
+  - if a warning references a resolved commit SHA, map that SHA back to the action release before editing
+  - update only the action that actually changed; do not extrapolate to related actions
   - validate workflow YAML after every change
   - document any non-obvious pin or exception in the PR or commit message
+  - if a workflow uses a cache or setup helper internally, check whether the warning comes from that helper rather than the visible `uses:` line
 
 ## Repository Notes
 
