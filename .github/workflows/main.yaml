@@ -5,6 +5,8 @@ on:
     branches:
       - "master"
       - "main"
+permissions:
+  contents: read
 env:
   TERM: 'xterm'
   SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -13,6 +15,9 @@ jobs:
   vuln-report:
     name: Vulnerability Report
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -34,6 +39,8 @@ jobs:
   black-lint:
     name: Lint Python app
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -47,6 +54,8 @@ jobs:
     name: Lint Helm chart
     needs: [black-lint]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -58,6 +67,8 @@ jobs:
     name: Create new tag
     needs: [black-lint, helm-lint]
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     outputs:
       version: ${{ steps.save-output.outputs.version }}
     steps:
@@ -80,6 +91,8 @@ jobs:
     name: Publish Docker Image
     needs: [black-lint, helm-lint, bump-tag]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     outputs:
       tags: ${{ steps.docker-tags.outputs.tags }}
     steps:
