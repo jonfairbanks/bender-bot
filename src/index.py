@@ -3,19 +3,16 @@ import json
 import os
 import sys
 import time
-from pathlib import Path
 
 import context
 
+from chat import get_runtime_config
 from chat import openai_chat_completion
 from chat import together_chat_completion
 from log_config import logger
 
-from dotenv import load_dotenv
 from slack_bolt.app.async_app import AsyncApp
 from slack_bolt.adapter.socket_mode.async_handler import AsyncSocketModeHandler
-
-load_dotenv(dotenv_path=Path(__file__).with_name(".env"), override=True)
 
 # Determine Mode -- RESPOND or LISTEN
 mode = os.getenv("BOT_MODE", "RESPOND")
@@ -58,6 +55,8 @@ async def handle_delete_events(body):
 @app.event(slack_mode)
 async def handle_app_mentions(ack, body, say, client):
     await ack()
+    channel_id = None
+    message_ts = None
     # Add an emoji to the incoming requests
     try:
         channel_id = body["event"]["channel"]
@@ -67,6 +66,8 @@ async def handle_app_mentions(ack, body, say, client):
         )
     except Exception as e:
         logger.error(f"⛔ Slackmoji failed: {e}")
+        channel_id = body.get("event", {}).get("channel")
+        message_ts = body.get("event", {}).get("ts")
 
     try:
         context.handle_events(body)
@@ -81,35 +82,70 @@ async def handle_app_mentions(ack, body, say, client):
         ai_resp = openai_chat_completion(channel_id)
     else:
         logger.warning("No OpenAI or Together API key configured; skipping reply")
-        return await say("No chat provider is configured for this bot.")
+        ai_resp = {
+            "ok": False,
+            "usage": "0",
+            "model": "none",
+            "text": "No chat provider is configured for this bot.",
+        }
     end_time = time.time()
     elapsed_time = f"{(end_time - start_time):.2f}"
+    context_stats = ai_resp.get("context_stats", {})
+    stored_messages = context_stats.get("stored_messages", len(context.get_messages(channel_id)))
+    sent_messages = context_stats.get("sent_messages", stored_messages)
+    budget_used = context_stats.get("budget_used", 0)
 
     # Respond to the user
-    return await say(
-        text=ai_resp["text"],
-        blocks=[
-            {"type": "section", "text": {"type": "mrkdwn", "text": ai_resp["text"]}},
-            {"type": "divider"},
-            {
-                "type": "context",
-                "elements": [
-                    {
-                        "type": "plain_text",
-                        "text": "Response Time: "
-                        + str(elapsed_time)
-                        + "s || Model: "
-                        + str(ai_resp["model"].upper())
-                        + " || Context Depth: "
-                        + str(len(context.CHAT_CONTEXT[channel_id]))
-                        + " || Complexity: "
-                        + str(ai_resp["usage"]),
-                        "emoji": True,
-                    }
-                ],
-            },
-        ],
-    )
+    try:
+        response = await say(
+            text=ai_resp["text"],
+            blocks=[
+                {"type": "section", "text": {"type": "mrkdwn", "text": ai_resp["text"]}},
+                {"type": "divider"},
+                {
+                    "type": "context",
+                    "elements": [
+                        {
+                            "type": "plain_text",
+                            "text": "Response Time: "
+                            + str(elapsed_time)
+                            + "s || Model: "
+                            + str(ai_resp["model"])
+                            + " || Stored Messages: "
+                            + str(stored_messages)
+                            + " || Sent Messages: "
+                            + str(sent_messages)
+                            + " || Tokens Used: "
+                            + str(budget_used),
+                            "emoji": True,
+                        }
+                    ],
+                },
+            ],
+        )
+        try:
+            await client.reactions_remove(
+                channel=channel_id, timestamp=message_ts, name="eyes"
+            )
+            if not ai_resp["ok"]:
+                await client.reactions_add(
+                    channel=channel_id, timestamp=message_ts, name="warning"
+                )
+        except Exception as e:
+            logger.error(f"⛔ Reaction update failed: {e}")
+        return response
+    except Exception as e:
+        logger.error(f"⛔ Slack reply failed: {e}")
+        try:
+            await client.reactions_remove(
+                channel=channel_id, timestamp=message_ts, name="eyes"
+            )
+            await client.reactions_add(
+                channel=channel_id, timestamp=message_ts, name="warning"
+            )
+        except Exception as reaction_error:
+            logger.error(f"⛔ Reaction fallback failed: {reaction_error}")
+        raise
 
 
 # Respond to /context commands
@@ -117,7 +153,7 @@ async def handle_app_mentions(ack, body, say, client):
 async def get_context(ack, body, respond):
     await ack()
     channel_id = body["channel_id"]
-    channel_context = json.dumps(context.CHAT_CONTEXT.get(channel_id, []))
+    channel_context = json.dumps(context.get_messages(channel_id))
     await respond(f"Channel Context: ```{channel_context}```")
     return
 
@@ -127,7 +163,7 @@ async def get_context(ack, body, respond):
 async def reset_context(ack, body, respond):
     await ack()
     channel_id = body["channel_id"]
-    context.CHAT_CONTEXT.setdefault(channel_id, []).clear()
+    context.reset_channel(channel_id)
     await respond("Hmm, I forgot what we were talking about 🤔")
 
 
@@ -140,6 +176,14 @@ async def handle_message_events(ack, body):
 
 async def main():
     try:
+        runtime = get_runtime_config()
+        logger.info(
+            "Startup: provider=%s model=%s reasoning=%s context_budget=%s",
+            runtime["provider"],
+            runtime["model"],
+            runtime["reasoning"],
+            runtime["context_budget"],
+        )
         handler = AsyncSocketModeHandler(app, os.environ["SLACK_APP_TOKEN"])
         await handler.start_async()
     except KeyboardInterrupt:
