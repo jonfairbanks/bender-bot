@@ -1,5 +1,5 @@
 # Build stage
-FROM python:3.14 as builder
+FROM python:3.14 AS builder
 
 RUN apt-get update && apt-get install python3-dev gcc libc-dev make cmake -y
 RUN pip install --upgrade pip
