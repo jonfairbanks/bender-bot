@@ -2,7 +2,7 @@
 
 #### Requirements
 
-- Python 3.9+
+- Python 3.14+
 - [A Slack app token](https://api.slack.com/apps)
 	- Create a Slack app from scratch
 		- NEW: Create a new app using a Slack [app manifest](../manifest.yml)
@@ -10,7 +10,6 @@
 - An API key for Chat capabilities (If both keys are set, Together.ai will be used as the default)
 	- [Together.ai API key](https://platform.openai.com/account/api-keys) for open-source models (ex: Llama)
 	- [OpenAI API key](https://platform.openai.com/account/api-keys) for ChatGPT models
-- A [Replica API key](https://replicate.com/account) for Image related features
 
 (Note: Python packages `slack` and `slackclient` are no longer supported. Please use `slack_bolt`.)
 
@@ -18,7 +17,7 @@
 
 - Setup pipenv: `pip install pipenv && pipenv shell`
 - Install dependencies: `pipenv install`
-- Launch the service with your Slack token: `SLACK_APP_TOKEN='xapp-xxxxx' SLACK_BOT_TOKEN='xoxb-xxxxx' SLACK_SIGNING_SECRET='xxxxx' OPENAI_API_KEY='xxxxx' REPLICATE_API_TOKEN='xxxxx' python3 index.py`
+- Launch the service with your Slack token: `SLACK_APP_TOKEN='xapp-xxxxx' SLACK_BOT_TOKEN='xoxb-xxxxx' SLACK_SIGNING_SECRET='xxxxx' OPENAI_API_KEY='xxxxx' python3 index.py`
 - Invite the bot to a channel and send a sample message
 
 #### Docker

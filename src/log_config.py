@@ -1,8 +1,11 @@
-import logging, os, sys
+import logging
+import os
+import sys
+from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(dotenv_path=Path(__file__).with_name(".env"), override=True)
 
 # Create the formatter
 formatter = logging.Formatter(
@@ -17,4 +20,5 @@ handler.setFormatter(formatter)
 # Configure your logger
 logger = logging.getLogger(__name__)
 logger.addHandler(handler)
-logger.setLevel(logging.DEBUG if os.getenv("DEBUG") else logging.INFO)
+logger.setLevel(logging.DEBUG if os.getenv("DEBUG") == "True" else logging.INFO)
+logger.propagate = False

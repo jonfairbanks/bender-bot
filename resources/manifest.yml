@@ -7,10 +7,6 @@ features:
     display_name: Bender
     always_online: true
   slash_commands:
-    - command: /generate
-      description: Generate an image
-      usage_hint: a pig on a bicycle, 4k
-      should_escape: false
     - command: /context
       description: Get current chat context
       should_escape: false
@@ -29,9 +25,7 @@ oauth_config:
       - chat:write.customize
       - chat:write.public
       - commands
-      - files:read
       - links:read
-      - links:write
       - reactions:read
       - reactions:write
       - incoming-webhook
