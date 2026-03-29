@@ -42,6 +42,13 @@ There is no dedicated automated test suite in this repo. Use these commands to v
 - Keep logging restrained:
   - avoid noisy startup/debug logs unless they are required for troubleshooting
 - Prefer least-privilege changes in workflow files and CI config.
+- When updating GitHub Actions:
+  - verify the upstream release page for the action before bumping the tag
+  - prefer the latest published major tag only if that major actually exists upstream
+  - do not assume `v4` or `v5` exists just because it feels current
+  - keep major-tag bumps scoped to the specific action that changed
+  - validate workflow YAML after every change
+  - document any non-obvious pin or exception in the PR or commit message
 
 ## Repository Notes
 
