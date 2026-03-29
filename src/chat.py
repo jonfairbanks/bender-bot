@@ -179,6 +179,7 @@ def _format_sources_block(sources, limit=5):
     clipped = sources[:limit]
     return "\n\nSources:\n" + "\n".join(f"• {source}" for source in clipped)
 
+
 ###############
 # Together.ai #
 ###############
@@ -316,9 +317,7 @@ def together_chat_completion(channel_id):
             "ok": True,
             "usage": completion.usage.total_tokens,
             "model": MODEL,
-            "text": sanitize_slack_mrkdwn(
-                str(completion.choices[0].message.content)
-            ),
+            "text": sanitize_slack_mrkdwn(str(completion.choices[0].message.content)),
             "context_stats": context_stats,
         }
 

@@ -91,7 +91,9 @@ async def handle_app_mentions(ack, body, say, client):
     end_time = time.time()
     elapsed_time = f"{(end_time - start_time):.2f}"
     context_stats = ai_resp.get("context_stats", {})
-    stored_messages = context_stats.get("stored_messages", len(context.get_messages(channel_id)))
+    stored_messages = context_stats.get(
+        "stored_messages", len(context.get_messages(channel_id))
+    )
     sent_messages = context_stats.get("sent_messages", stored_messages)
     budget_used = context_stats.get("budget_used", 0)
 
@@ -100,7 +102,10 @@ async def handle_app_mentions(ack, body, say, client):
         response = await say(
             text=ai_resp["text"],
             blocks=[
-                {"type": "section", "text": {"type": "mrkdwn", "text": ai_resp["text"]}},
+                {
+                    "type": "section",
+                    "text": {"type": "mrkdwn", "text": ai_resp["text"]},
+                },
                 {"type": "divider"},
                 {
                     "type": "context",

@@ -177,9 +177,7 @@ def handle_delete(body):
         for message in list(channel_context):
             if message.get("ts") == previous_ts and message.get("role") == "user":
                 channel_context.remove(message)
-                logger.debug(
-                    f"🗑️ Context deleted: [{channel_id}] {previous_ts}\n"
-                )
+                logger.debug(f"🗑️ Context deleted: [{channel_id}] {previous_ts}\n")
                 break
     except Exception as e:
         logger.error(f"⛔ Delete failed: [{channel_id}] {e}\n")
