@@ -75,6 +75,11 @@ jobs:
     outputs:
       version: ${{ steps.save-output.outputs.version }}
     steps:
+      - name: Checkout source code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
       - name: Bump version and push tag
         id: bump-tag
         uses: anothrNick/github-tag-action@v1
